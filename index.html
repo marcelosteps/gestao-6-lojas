@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão 6 Lojas - DRE Completo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2C3E50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--dark);
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            color: white;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--primary);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .kpi-card h3 {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .kpi-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* Formulário de Lançamento */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--light);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Tabela de Lançamentos */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--light);
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-receita {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-despesa {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-custo {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* DRE Tables */
+        .dre-table {
+            margin-bottom: 30px;
+        }
+
+        .dre-table h3 {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .dre-row {
+            display: grid;
+            grid-template-columns: 2fr repeat(12, 1fr) 1.5fr;
+            gap: 5px;
+            padding: 10px;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .dre-row.header {
+            background: var(--dark);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .dre-row.total {
+            background: #fff3cd;
+            font-weight: bold;
+        }
+
+        .dre-row.subtotal {
+            background: #e8f4f8;
+            font-weight: 600;
+        }
+
+        .dre-cell {
+            padding: 8px;
+            text-align: right;
+        }
+
+        .dre-cell:first-child {
+            text-align: left;
+        }
+
+        /* Loja Cards */
+        .loja-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .loja-card {
+            background: white;
+            border: 2px solid var(--light);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .loja-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .loja-card h4 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .loja-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .loja-stat:last-child {
+            border-bottom: none;
+        }
+
+        /* Alert/Message */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid var(--secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .tabs {
+                font-size: 0.9rem;
+            }
+
+            .tab {
+                padding: 12px 15px;
+            }
+
+            .kpi-card .value {
+                font-size: 1.5rem;
+            }
+
+            .dre-row {
+                font-size: 0.85rem;
+            }
+        }
+
+        .delete-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Sistema de Gestão - 6 Lojas</h1>
+            <p>DRE Completo | Lançamentos | Dashboard Executivo</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab" onclick="showTab('lancamentos')">💰 Novo Lançamento</button>
+            <button class="tab" onclick="showTab('historico')">📋 Histórico</button>
+            <button class="tab" onclick="showTab('dre-loja1')">🏪 DRE Loja 1</button>
+            <button class="tab" onclick="showTab('dre-loja2')">🏪 DRE Loja 2</button>
+            <button class="tab" onclick="showTab('dre-loja3')">🏪 DRE Loja 3</button>
+            <button class="tab" onclick="showTab('dre-loja4')">🏪 DRE Loja 4</button>
+            <button class="tab" onclick="showTab('dre-loja5')">🏪 DRE Loja 5</button>
+            <button class="tab" onclick="showTab('dre-loja6')">🏪 DRE Loja 6</button>
+            <button class="tab" onclick="showTab('consolidado')">🎯 DRE Consolidado</button>
+        </div>
+
+        <div class="content">
+            <!-- DASHBOARD -->
+            <div id="dashboard" class="tab-content active">
+                <h2 style="margin-bottom: 20px;">Dashboard Executivo</h2>
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <h3>Receita Total Grupo</h3>
+                        <div class="value" id="kpi-receita-total">R$ 0,00</div>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>Lucro Líquido</h3>
+                        <div class="value" id="kpi-lucro">R$ 0,00</div>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>Margem Líquida</h3>
+                        <div class="value" id="kpi-margem">0,00%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>Total de Lançamentos</h3>
+                        <div class="value" id="kpi-lancamentos">0</div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 30px 0 20px 0;">Performance por Loja</h3>
+                <div class="loja-grid" id="lojas-performance"></div>
+            </div>
+
+            <!-- NOVO LANÇAMENTO -->
+            <div id="lancamentos" class="tab-content">
+                <h2 style="margin-bottom: 20px;">💰 Novo Lançamento</h2>
+                
+                <div class="alert alert-success" id="successAlert">
+                    ✅ Lançamento registrado com sucesso!
+                </div>
+
+                <form id="lancamentoForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data</label>
+                            <input type="date" id="data" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Loja</label>
+                            <select id="loja" required>
+                                <option value="">Selecione...</option>
+                                <option value="Loja 1">Loja 1</option>
+                                <option value="Loja 2">Loja 2</option>
+                                <option value="Loja 3">Loja 3</option>
+                                <option value="Loja 4">Loja 4</option>
+                                <option value="Loja 5">Loja 5</option>
+                                <option value="Loja 6">Loja 6</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo</label>
+                            <select id="tipo" required onchange="updateCategorias()">
+                                <option value="">Selecione...</option>
+                                <option value="Receita">Receita</option>
+                                <option value="Despesa">Despesa</option>
+                                <option value="Custo">Custo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Categoria</label>
+                            <select id="categoria" required onchange="updateSubcategorias()">
+                                <option value="">Selecione o tipo primeiro...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Subcategoria</label>
+                            <select id="subcategoria" required>
+                                <option value="">Selecione a categoria primeiro...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" id="descricao" placeholder="Ex: Vendas do dia, Pagamento fornecedor..." required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Valor (R$)</label>
+                            <input type="number" id="valor" step="0.01" placeholder="0,00" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Centro de Custo</label>
+                            <select id="centroCusto" required>
+                                <option value="">Selecione...</option>
+                                <option value="Comercial">Comercial</option>
+                                <option value="Administrativo">Administrativo</option>
+                                <option value="RH">RH</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Operacional">Operacional</option>
+                                <option value="Financeiro">Financeiro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Observações (opcional)</label>
+                        <textarea id="observacoes" rows="3" placeholder="Informações adicionais..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">✅ Registrar Lançamento</button>
+                </form>
+            </div>
+
+            <!-- HISTÓRICO -->
+            <div id="historico" class="tab-content">
+                <h2 style="margin-bottom: 20px;">📋 Histórico de Lançamentos</h2>
+                
+                <div class="form-row" style="margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label>Filtrar por Loja</label>
+                        <select id="filtroLoja" onchange="renderHistorico()">
+                            <option value="">Todas as Lojas</option>
+                            <option value="Loja 1">Loja 1</option>
+                            <option value="Loja 2">Loja 2</option>
+                            <option value="Loja 3">Loja 3</option>
+                            <option value="Loja 4">Loja 4</option>
+                            <option value="Loja 5">Loja 5</option>
+                            <option value="Loja 6">Loja 6</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Filtrar por Tipo</label>
+                        <select id="filtroTipo" onchange="renderHistorico()">
+                            <option value="">Todos os Tipos</option>
+                            <option value="Receita">Receita</option>
+                            <option value="Despesa">Despesa</option>
+                            <option value="Custo">Custo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container" id="historicoContainer"></div>
+            </div>
+
+            <!-- DRE LOJAS (1-6) -->
+            <div id="dre-loja1" class="tab-content">
+                <div id="dre-content-loja1"></div>
+            </div>
+            <div id="dre-loja2" class="tab-content">
+                <div id="dre-content-loja2"></div>
+            </div>
+            <div id="dre-loja3" class="tab-content">
+                <div id="dre-content-loja3"></div>
+            </div>
+            <div id="dre-loja4" class="tab-content">
+                <div id="dre-content-loja4"></div>
+            </div>
+            <div id="dre-loja5" class="tab-content">
+                <div id="dre-content-loja5"></div>
+            </div>
+            <div id="dre-loja6" class="tab-content">
+                <div id="dre-content-loja6"></div>
+            </div>
+
+            <!-- DRE CONSOLIDADO -->
+            <div id="consolidado" class="tab-content">
+                <div id="dre-consolidado-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
